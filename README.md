@@ -124,6 +124,8 @@ Successfully added SSH key for profile 'work' to keychain
 
 ### How SSH Multi-Account Support Works
 
+**Why host aliases?** SSH can't distinguish between multiple keys for the same host. Without aliases, SSH tries keys in order and GitHub accepts whichever matches first—potentially authenticating you with the wrong account.
+
 When using `--auto-ssh`, the tool automatically:
 
 1. **Creates SSH config entries** in `~/.ssh/config` with unique host aliases
