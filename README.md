@@ -8,6 +8,8 @@
 
 - **Git includeIf automation** - Set up once, switches automatically by directory
 - **SSH config with IdentitiesOnly** - Proper multi-account SSH key isolation
+- **PAT (HTTPS) authentication** - Personal Access Token support for HTTPS remotes
+- **Repo setup (`gh`)** - Auto-configure repo from remote URL and matching profile
 - **Multi-email support** - Multiple emails per profile for different contexts
 - **Auto SSH key management** - Platform-specific keychain integration
 - **Profile import/export** - Share configurations across machines
@@ -58,9 +60,10 @@ go install github.com/calghar/gas-cli@latest
 ### Basic Usage
 
 ```bash
-# Add profiles
-gascli add work john.doe@company.com "John Doe" ABC123DEF456
-gascli add personal john@gmail.com "Johnny Smith"
+# Add profiles (name required; git-name, email, PAT, gpg-key optional)
+gascli add work "John Doe" john.doe@company.com ABC123DEF456
+gascli add personal john@gmail.com
+gascli add work "John Doe" ghp_xxxx  # With PAT for HTTPS
 
 # Setup automatic directory-based switching (recommended!)
 gascli auto ~/projects/work work
@@ -70,6 +73,9 @@ gascli auto ~/projects/personal personal
 # Or switch manually (affects global git config)
 gascli switch work
 gascli --auto-ssh switch personal  # Also adds SSH key
+
+# Configure repo from remote URL (run from repo root)
+gascli gh  # Matches profile by GitHub username, sets user.name/email/remote
 
 # List profiles and directory rules
 gascli list
@@ -83,14 +89,20 @@ gascli current
 
 | Command | Description |
 |---------|-------------|
-| `gascli add <name> <email> [git-name] [gpg-key]` | Add a new profile |
+| `gascli add <name> [git-name] [email/pat] [gpg-key] [--pat TOKEN]` | Add a new profile |
 | `gascli auto <dir> <profile>` | Setup automatic switching (uses Git includeIf) |
+| `gascli auto-remove <dir>` | Remove directory rule |
 | `gascli switch <name> [email]` | Manually switch profile globally |
 | `gascli --auto-ssh switch <name>` | Switch and auto-add SSH key to keychain |
+| `gascli gh` | Configure repo from remote URL and matching profile |
 | `gascli list` | List all profiles with details |
 | `gascli current` | Show current Git configuration |
 | `gascli auto-list` | List directory rules |
 | `gascli remove <name>` | Remove a profile |
+| `gascli pat set <profile> <token>` | Set PAT for HTTPS authentication |
+| `gascli pat clear <profile>` | Clear PAT for profile |
+| `gascli add-email <profile> <email>` | Add email to profile |
+| `gascli remove-email <profile> <email>` | Remove email from profile |
 | `gascli export [file]` | Export profiles to JSON |
 | `gascli import <file>` | Import profiles from JSON |
 
@@ -158,6 +170,17 @@ git remote set-url origin git@github.com-personal:user/repo.git
 
 This approach allows multiple GitHub SSH keys to coexist peacefully, with SSH automatically selecting the correct key based on the host alias you use.
 
+### Repo Setup with `gh`
+
+Run `gascli gh` from a repo root to auto-configure it from the remote origin:
+
+```bash
+cd ~/projects/my-repo
+gascli gh
+```
+
+Scans `.git/config` for the remote URL, extracts the GitHub username, finds a matching profile (by git-name), and sets `user.name`, `user.email`, and the remote URL with PAT for HTTPS. If no profile matches, you'll be prompted to select one.
+
 ## 🛠️ Requirements
 
 **Runtime Requirements:**
@@ -177,8 +200,8 @@ This approach allows multiple GitHub SSH keys to coexist peacefully, with SSH au
 - **[Use Cases](docs/use-cases.md)** - Team setups, freelancing, organizations
 - **[Security Features](docs/security.md)** - GPG signing, SSH keys, best practices
 - **[Installation Guide](docs/installation.md)** - Platform-specific instructions
-- **[Advanced Features](docs/advanced-features.md)** - Directory rules, automation
-- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+- **[Features](docs/features.md)** - Technical details and architecture
+- **[User Guide](docs/user-guide.md)** - Workflows and best practices
 
 ## 🏗️ Development
 
@@ -212,7 +235,7 @@ git clone https://github.com/calghar/gas-cli.git
 cd gas-cli
 make deps
 make build
-./gascli --help
+./bin/gascli --help
 ```
 
 ## 📄 License

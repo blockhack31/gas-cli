@@ -9,7 +9,7 @@ gascli current
 gascli remove <name>
 ```
 
-Name is required; git-name, email, and gpg-key are optional. `gascli add work "John Doe" ghp_xxx` adds name + git-name + PAT. Add email later with `add-email`.
+Name is required; git-name, email, and gpg-key are optional. Tokens starting with `ghp_` are auto-detected as PAT: `gascli add work ghp_xxx` or `gascli add work "John Doe" ghp_xxx`. Add email later with `add-email`.
 
 ## PAT (Personal Access Token)
 
@@ -54,6 +54,19 @@ gascli list-emails <profile>
 gascli export [file]     # Prints to stdout if no file
 gascli import <file>
 ```
+
+## Repo Setup (gh)
+
+```bash
+gascli gh
+```
+
+Scans `.git/config` for remote origin URL, extracts GitHub username, finds matching profile (by git-name), and configures:
+- `git config user.name` (GitHub username)
+- `git config user.email` (profile primary email)
+- `git remote set-url origin https://USER:$PAT@github.com/USER/REPO.git`
+
+If no profile matches the GitHub username, lists profiles and prompts for selection. Run from repo root.
 
 ## Global Flags
 

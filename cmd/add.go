@@ -20,10 +20,12 @@ var addCmd = &cobra.Command{
 Examples:
   gascli add work                           # Name only
   gascli add work "John Doe"                # Name + git-name
-  gascli add work "John Doe" ghp_xxxx       # Name + git-name + PAT (always supported)
+  gascli add work ghp_xxxx                  # Name + PAT (2 args, auto-detected)
+  gascli add work "John Doe" ghp_xxxx       # Name + git-name + PAT
+  gascli add work john@company.com ghp_xxxx # Name + email + PAT (3 args, auto-detected)
   gascli add work "John Doe" john@company.com ABC123DEF456
   gascli add work john@company.com         # Name + email (2 args, auto-detected)
-  gascli add work --pat ghp_xxxx             # Name + PAT via flag`,
+  gascli add work --pat ghp_xxxx            # Name + PAT via flag`,
 	Args: cobra.RangeArgs(1, 4),
 	RunE: runAdd,
 }
@@ -55,11 +57,24 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		email = args[1]
 	}
 
+	// When only 2 args: if second looks like PAT (ghp_/gho_/github_pat_), treat as PAT not git-name
+	if len(args) == 2 && looksLikePAT(args[1]) {
+		gitName = ""
+		if patFlag == "" {
+			patFlag = args[1]
+		}
+	}
+
 	// When 3+ args: if third looks like PAT (ghp_/gho_/github_pat_), treat as PAT not email
 	if len(args) >= 3 && looksLikePAT(args[2]) {
 		email = ""
 		if patFlag == "" {
 			patFlag = args[2]
+		}
+		// If second arg looks like email (@), treat as email not git-name (e.g. gascli add corewarex uonce09@gmail.com ghp_xxx)
+		if containsAt(args[1]) {
+			gitName = ""
+			email = args[1]
 		}
 	}
 

@@ -29,10 +29,9 @@ build-all:
 	GOOS=windows GOARCH=amd64 $(GO) build $(GOFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-windows-amd64.exe .
 	@echo "All builds complete in $(BUILD_DIR)/"
 
-## install: Build and install to Go bin (in PATH)
+## install: Build and install to $GOPATH/bin
 install: build
-	@BIN_DIR=$$($(GO) env GOBIN); \
-	[ -n "$$BIN_DIR" ] || BIN_DIR=$$($(GO) env GOPATH)/bin; \
+	@BIN_DIR=$$($(GO) env GOPATH)/bin; \
 	mkdir -p "$$BIN_DIR"; \
 	cp bin/$(BINARY_NAME) "$$BIN_DIR/$(BINARY_NAME)"; \
 	echo "Installed to $$BIN_DIR/$(BINARY_NAME)"

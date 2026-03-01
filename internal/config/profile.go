@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 )
 
 // Profile represents a GitHub account profile
@@ -169,6 +170,39 @@ func (c *Config) GetProfile(name string) (*Profile, error) {
 		return nil, fmt.Errorf("profile '%s' not found", name)
 	}
 	return profile, nil
+}
+
+// GetProfileByGitName returns the profile whose GitName matches, or empty string if none.
+func (c *Config) GetProfileByGitName(gitName string) (string, *Profile) {
+	for name, profile := range c.Profiles {
+		if profile.GitName == gitName {
+			return name, profile
+		}
+	}
+	return "", nil
+}
+
+// GetProfileByGitNameOrName returns the profile whose GitName or profile name matches.
+func (c *Config) GetProfileByGitNameOrName(gitName string) (string, *Profile) {
+	// Prefer git-name match
+	if name, p := c.GetProfileByGitName(gitName); p != nil {
+		return name, p
+	}
+	// Fall back to profile name match (e.g. profile "blockhack31" for GitHub user blockhack31)
+	if p, err := c.GetProfile(gitName); err == nil {
+		return gitName, p
+	}
+	return "", nil
+}
+
+// ProfileNames returns all profile names in deterministic order.
+func (c *Config) ProfileNames() []string {
+	names := make([]string, 0, len(c.Profiles))
+	for name := range c.Profiles {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
 }
 
 // RemoveProfile removes a profile by name

@@ -50,6 +50,9 @@ gascli auto-remove <directory>
 gascli switch <profile> [email]
 gascli --auto-ssh switch <profile>
 
+# Repo setup (from .git/config)
+gascli gh   # Parse remote URL, match profile by git-name, set user.name/email/remote
+
 # PAT
 gascli pat set <profile> <token>
 gascli pat clear <profile>
