@@ -1,21 +1,22 @@
 .PHONY: build install clean test lint help
 
-BINARY_NAME=gh-switch
+BINARY_NAME=gascli
 VERSION?=2.0.0
 BUILD_DIR=dist
 GO=go
-GOFLAGS=-ldflags="-s -w -X github.com/calghar/gh-account-switcher/cmd.version=$(VERSION)"
+GOFLAGS=-ldflags="-s -w -X github.com/calghar/gas-cli/cmd.version=$(VERSION)"
 
 ## help: Show this help message
 help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
 
-## build: Build the binary for current platform
+## build: Build the binary to ./bin (project directory)
 build:
 	@echo "Building $(BINARY_NAME) v$(VERSION)..."
-	$(GO) build $(GOFLAGS) -o $(BINARY_NAME) .
-	@echo "Build complete: ./$(BINARY_NAME)"
+	@mkdir -p bin
+	$(GO) build $(GOFLAGS) -o bin/$(BINARY_NAME) .
+	@echo "Build complete: ./bin/$(BINARY_NAME)"
 
 ## build-all: Build binaries for all platforms
 build-all:
@@ -28,14 +29,13 @@ build-all:
 	GOOS=windows GOARCH=amd64 $(GO) build $(GOFLAGS) -o $(BUILD_DIR)/$(BINARY_NAME)-windows-amd64.exe .
 	@echo "All builds complete in $(BUILD_DIR)/"
 
-## install: Install the binary to ~/bin
+## install: Build and install to Go bin (in PATH)
 install: build
-	@echo "Installing $(BINARY_NAME) to ~/bin..."
-	@mkdir -p ~/bin
-	@cp $(BINARY_NAME) ~/bin/$(BINARY_NAME)
-	@chmod +x ~/bin/$(BINARY_NAME)
-	@echo "Installed to ~/bin/$(BINARY_NAME)"
-	@echo "Make sure ~/bin is in your PATH"
+	@BIN_DIR=$$($(GO) env GOBIN); \
+	[ -n "$$BIN_DIR" ] || BIN_DIR=$$($(GO) env GOPATH)/bin; \
+	mkdir -p "$$BIN_DIR"; \
+	cp bin/$(BINARY_NAME) "$$BIN_DIR/$(BINARY_NAME)"; \
+	echo "Installed to $$BIN_DIR/$(BINARY_NAME)"
 
 ## test: Run tests
 test:
@@ -49,6 +49,7 @@ lint:
 ## clean: Remove build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
+	@rm -rf bin
 	@rm -f $(BINARY_NAME)
 	@rm -rf $(BUILD_DIR)
 	@rm -f coverage.out

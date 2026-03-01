@@ -1,6 +1,6 @@
 package main
 
-import "github.com/calghar/gh-account-switcher/cmd"
+import "github.com/calghar/gas-cli/cmd"
 
 func main() {
 	cmd.Execute()

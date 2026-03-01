@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
-	"github.com/calghar/gh-account-switcher/internal/git"
-	"github.com/calghar/gh-account-switcher/internal/ssh"
+	"github.com/calghar/gas-cli/internal/config"
+	"github.com/calghar/gas-cli/internal/git"
+	"github.com/calghar/gas-cli/internal/ssh"
 	"github.com/spf13/cobra"
 )
 

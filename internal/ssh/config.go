@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
+	"github.com/calghar/gas-cli/internal/config"
 )
 
 // ConfigManager manages SSH configuration

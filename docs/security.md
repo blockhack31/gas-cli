@@ -38,7 +38,7 @@ ssh-keygen -t ed25519 -f ~/.ssh/id_personal -C "personal@example.com"
 ```bash
 gpg --full-generate-key
 gpg --list-secret-keys --keyid-format LONG
-gh-switch add work email@example.com "Name" YOUR_KEY_ID
+gascli add work email@example.com "Name" YOUR_KEY_ID
 ```
 
 ### Automatic Configuration
@@ -53,9 +53,10 @@ git log --show-signature
 
 ## Configuration Storage
 
-- **Location**: `~/.github-switcher/config.json`
+- **Location**: `~/.gascli/config.json`
 - **Permissions**: `0600` (user read/write only)
-- **Contents**: Profile metadata, directory rules (no secrets)
+- **Contents**: Profile metadata, directory rules, PAT
+- **Credentials**: `~/.gascli/credentials-{profile}` for PAT (Git credential store)
 
 ## Best Practices
 

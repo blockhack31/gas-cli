@@ -3,10 +3,10 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
-	"github.com/calghar/gh-account-switcher/internal/git"
-	"github.com/calghar/gh-account-switcher/internal/platform"
-	"github.com/calghar/gh-account-switcher/internal/ssh"
+	"github.com/calghar/gas-cli/internal/config"
+	"github.com/calghar/gas-cli/internal/git"
+	"github.com/calghar/gas-cli/internal/platform"
+	"github.com/calghar/gas-cli/internal/ssh"
 	"github.com/spf13/cobra"
 )
 
@@ -16,12 +16,12 @@ var switchCmd = &cobra.Command{
 	Long: `Switch to the specified profile globally.
 
 This sets the global Git configuration. For automatic switching based on
-directory, use 'gh-switch auto' to setup directory rules instead.
+directory, use 'gascli auto' to setup directory rules instead.
 
 Examples:
-  gh-switch switch work
-  gh-switch --auto-ssh switch work
-  gh-switch switch work john.contractor@company.com`,
+  gascli switch work
+  gascli --auto-ssh switch work
+  gascli switch work john.contractor@company.com`,
 	Args: cobra.RangeArgs(1, 2),
 	RunE: runSwitch,
 }
@@ -141,7 +141,7 @@ func runSwitch(cmd *cobra.Command, args []string) error {
 		sshKeyPath := ssh.GetSSHKeyPath(profileName)
 		if ssh.CheckSSHKeyExists(sshKeyPath) {
 			fmt.Printf("\nSSH key available: %s\n", sshKeyPath)
-			fmt.Printf("  Add with: gh-switch --auto-ssh switch %s\n", profileName)
+			fmt.Printf("  Add with: gascli --auto-ssh switch %s\n", profileName)
 			hostAlias := ssh.GetHostAlias(profileName)
 			fmt.Printf("  Use this host in git URLs: git@%s:user/repo.git\n", hostAlias)
 		}

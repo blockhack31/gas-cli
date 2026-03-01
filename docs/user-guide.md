@@ -5,15 +5,15 @@
 ### 1. Add Profiles
 
 ```bash
-gh-switch add work john@company.com "John Doe" ABC123GPG
-gh-switch add personal john@personal.com "John Smith"
+gascli add work john@company.com "John Doe" ABC123GPG
+gascli add personal john@personal.com "John Smith"
 ```
 
 ### 2. Setup Directory Rules (Recommended)
 
 ```bash
-gh-switch auto ~/work work
-gh-switch auto ~/personal personal
+gascli auto ~/work work
+gascli auto ~/personal personal
 ```
 
 Git now automatically uses the correct profile based on repository location. No manual switching needed.
@@ -21,8 +21,8 @@ Git now automatically uses the correct profile based on repository location. No 
 ### 3. Alternative: Manual Switching
 
 ```bash
-gh-switch switch work
-gh-switch --auto-ssh switch personal  # Also loads SSH key
+gascli switch work
+gascli --auto-ssh switch personal  # Also loads SSH key
 ```
 
 ## Git includeIf Workflow
@@ -62,19 +62,19 @@ git remote set-url origin git@github.com-personal:user/repo.git
 ## Multi-Email Profiles
 
 ```bash
-gh-switch add-email work john.contractor@company.com
-gh-switch switch work john.contractor@company.com  # Use specific email
-gh-switch list-emails work
+gascli add-email work john.contractor@company.com
+gascli switch work john.contractor@company.com  # Use specific email
+gascli list-emails work
 ```
 
 ## Import/Export
 
 ```bash
 # Backup
-gh-switch export > backup.json
+gascli export > backup.json
 
 # Restore on new machine
-gh-switch import backup.json
+gascli import backup.json
 ```
 
 ## GPG Signing

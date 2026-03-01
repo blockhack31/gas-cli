@@ -12,46 +12,46 @@
 
 ```bash
 # Apple Silicon
-curl -L https://github.com/calghar/gh-account-switcher/releases/latest/download/gh-switch-darwin-arm64 -o gh-switch
-chmod +x gh-switch
-sudo mv gh-switch /usr/local/bin/
+curl -L https://github.com/calghar/gas-cli/releases/latest/download/gascli-darwin-arm64 -o gascli
+chmod +x gascli
+sudo mv gascli /usr/local/bin/
 
 # Intel
-curl -L https://github.com/calghar/gh-account-switcher/releases/latest/download/gh-switch-darwin-amd64 -o gh-switch
-chmod +x gh-switch
-sudo mv gh-switch /usr/local/bin/
+curl -L https://github.com/calghar/gas-cli/releases/latest/download/gascli-darwin-amd64 -o gascli
+chmod +x gascli
+sudo mv gascli /usr/local/bin/
 ```
 
 ### Linux
 
 ```bash
-curl -L https://github.com/calghar/gh-account-switcher/releases/latest/download/gh-switch-linux-amd64 -o gh-switch
-chmod +x gh-switch
-sudo mv gh-switch /usr/local/bin/
+curl -L https://github.com/calghar/gas-cli/releases/latest/download/gascli-linux-amd64 -o gascli
+chmod +x gascli
+sudo mv gascli /usr/local/bin/
 ```
 
 ### Windows
 
-Download from [releases page](https://github.com/calghar/gh-account-switcher/releases).
+Download from [releases page](https://github.com/calghar/gas-cli/releases).
 
 ## Build from Source
 
 ```bash
-git clone https://github.com/calghar/gh-account-switcher.git
-cd gh-account-switcher
+git clone https://github.com/calghar/gas-cli.git
+cd gas-cli
 make build
-make install  # Installs to ~/bin
+make install  # Installs to Go bin ($GOPATH/bin or $GOBIN)
 ```
 
 ## Install with Go
 
 ```bash
-go install github.com/calghar/gh-account-switcher@latest
+go install github.com/calghar/gas-cli@latest
 ```
 
 ## Verify Installation
 
 ```bash
-gh-switch --version
-gh-switch --help
+gascli --version
+gascli --help
 ```

@@ -2,12 +2,13 @@ package git
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
+	"github.com/calghar/gas-cli/internal/config"
 )
 
 // ConfigManager manages Git configuration
@@ -52,6 +53,26 @@ func (gm *ConfigManager) SetupProfile(profile *config.Profile, directoryPath str
 	if profile.SSHKeyPath != "" {
 		configContent.WriteString(fmt.Sprintf("[core]\n"))
 		configContent.WriteString(fmt.Sprintf("\tsshCommand = ssh -i %s -F /dev/null\n", profile.SSHKeyPath))
+	}
+
+	// PAT credential helper for HTTPS (GitHub accepts any username, PAT as password)
+	credFile := filepath.Join(gm.homeDir, ".gascli", fmt.Sprintf("credentials-%s", profile.Name))
+	if profile.PAT != "" {
+		gascliDir := filepath.Join(gm.homeDir, ".gascli")
+		if err := os.MkdirAll(gascliDir, 0700); err != nil {
+			return fmt.Errorf("failed to create gascli directory: %w", err)
+		}
+		// Format: https://git:PAT@github.com (GitHub accepts "git" as username for PAT auth)
+		u := &url.URL{Scheme: "https", Host: "github.com"}
+		u.User = url.UserPassword("git", profile.PAT)
+		credURL := u.String()
+		if err := os.WriteFile(credFile, []byte(credURL+"\n"), 0600); err != nil {
+			return fmt.Errorf("failed to write credentials file: %w", err)
+		}
+		configContent.WriteString(fmt.Sprintf("[credential \"https://github.com\"]\n"))
+		configContent.WriteString(fmt.Sprintf("\thelper = store --file %s\n", credFile))
+	} else {
+		_ = os.Remove(credFile) // Remove stale credentials file when PAT is cleared
 	}
 
 	// Write profile-specific config
@@ -175,13 +196,17 @@ func (gm *ConfigManager) getGlobalConfig(key string) string {
 	return strings.TrimSpace(string(output))
 }
 
-// RemoveProfileConfig removes a profile's gitconfig file and includeIf directives
+// RemoveProfileConfig removes a profile's gitconfig file, credentials file, and includeIf directives
 func (gm *ConfigManager) RemoveProfileConfig(profileName string) error {
 	// Remove profile-specific gitconfig file
 	profileConfigPath := filepath.Join(gm.homeDir, fmt.Sprintf(".gitconfig-%s", profileName))
 	if err := os.Remove(profileConfigPath); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("failed to remove profile config: %w", err)
 	}
+
+	// Remove credentials file if it exists (contains PAT)
+	credFile := filepath.Join(gm.homeDir, ".gascli", fmt.Sprintf("credentials-%s", profileName))
+	_ = os.Remove(credFile) // Ignore errors (file might not exist)
 
 	// Note: includeIf directives remain in global config but point to non-existent files
 	// This is safe and won't cause issues

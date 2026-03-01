@@ -3,19 +3,28 @@
 ## Profile Management
 
 ```bash
-gh-switch add <name> <email> [git-name] [gpg-key]
-gh-switch list
-gh-switch current
-gh-switch remove <name>
+gascli add <name> <email> [git-name] [gpg-key] [--pat TOKEN]
+gascli list | gascli ls
+gascli current
+gascli remove <name>
 ```
+
+## PAT (Personal Access Token)
+
+```bash
+gascli pat set <profile> <token>
+gascli pat clear <profile>
+```
+
+For HTTPS authentication. Stored in `~/.gascli/config.json` and `~/.gascli/credentials-{profile}`.
 
 ## Directory-Based Switching (Git includeIf)
 
 ```bash
 # Primary workflow - set up once, automatic thereafter
-gh-switch auto <directory> <profile>
-gh-switch auto-list
-gh-switch auto-remove <directory>
+gascli auto <directory> <profile>
+gascli auto-list
+gascli auto-remove <directory>
 ```
 
 Creates `.gitconfig-{profile}` files and adds `includeIf` directives. Git automatically loads the correct config based on repository location.
@@ -23,8 +32,8 @@ Creates `.gitconfig-{profile}` files and adds `includeIf` directives. Git automa
 ## Manual Switching
 
 ```bash
-gh-switch switch <profile> [email]
-gh-switch --auto-ssh switch <profile>  # Also adds SSH key to keychain
+gascli switch <profile> [email]
+gascli --auto-ssh switch <profile>  # Also adds SSH key to keychain
 ```
 
 Modifies global git config. Use `auto` for directory-based switching instead.
@@ -32,16 +41,16 @@ Modifies global git config. Use `auto` for directory-based switching instead.
 ## Email Management
 
 ```bash
-gh-switch add-email <profile> <email>
-gh-switch remove-email <profile> <email>
-gh-switch list-emails <profile>
+gascli add-email <profile> <email>
+gascli remove-email <profile> <email>
+gascli list-emails <profile>
 ```
 
 ## Import/Export
 
 ```bash
-gh-switch export [file]     # Prints to stdout if no file
-gh-switch import <file>
+gascli export [file]     # Prints to stdout if no file
+gascli import <file>
 ```
 
 ## Global Flags

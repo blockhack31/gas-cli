@@ -3,8 +3,8 @@
 ## Setup
 
 ```bash
-git clone https://github.com/calghar/gh-account-switcher.git
-cd gh-account-switcher
+git clone https://github.com/calghar/gas-cli.git
+cd gas-cli
 make deps
 make build
 ```
@@ -43,6 +43,10 @@ internal/git/     # Git configuration
 internal/ssh/     # SSH configuration
 internal/platform/# Platform-specific code
 ```
+
+## Agent Skill
+
+See [docs/developer.md](docs/developer.md) for the Cursor agent skill that helps with development.
 
 ## Testing
 

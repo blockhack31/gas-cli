@@ -1,4 +1,4 @@
-module github.com/calghar/gh-account-switcher
+module github.com/calghar/gas-cli
 
 go 1.24.4
 

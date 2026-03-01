@@ -6,7 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
+	"github.com/calghar/gas-cli/internal/config"
+	"github.com/calghar/gas-cli/internal/git"
 	"github.com/spf13/cobra"
 )
 
@@ -16,8 +17,8 @@ var exportCmd = &cobra.Command{
 	Long: `Export all profiles to a JSON file or stdout.
 
 Examples:
-  gh-switch export                      # Print to stdout
-  gh-switch export my-profiles.json     # Export to file`,
+  gascli export                      # Print to stdout
+  gascli export my-profiles.json     # Export to file`,
 	Args: cobra.MaximumNArgs(1),
 	RunE: runExport,
 }
@@ -140,6 +141,14 @@ func runImport(cmd *cobra.Command, args []string) error {
 	// Save configuration
 	if err := configMgr.Save(cfg); err != nil {
 		return fmt.Errorf("failed to save configuration: %w", err)
+	}
+
+	// Setup git configs for all profiles (including PAT credential files)
+	gitMgr, err := git.NewConfigManager()
+	if err == nil {
+		if err := gitMgr.SetupAllProfiles(cfg); err != nil {
+			fmt.Printf("Warning: Failed to setup git configs: %v\n", err)
+		}
 	}
 
 	fmt.Printf("✓ Import completed!\n")

@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
+	"github.com/calghar/gas-cli/internal/config"
 	"github.com/spf13/cobra"
 )
 

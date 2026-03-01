@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
-	"github.com/calghar/gh-account-switcher/internal/git"
+	"github.com/calghar/gas-cli/internal/config"
+	"github.com/calghar/gas-cli/internal/git"
 	"github.com/spf13/cobra"
 )
 
@@ -18,8 +18,8 @@ This uses Git's includeIf feature to automatically use different profiles
 for different project directories.
 
 Examples:
-  gh-switch auto ~/projects/work work
-  gh-switch auto ~/projects/personal personal`,
+  gascli auto ~/projects/work work
+  gascli auto ~/projects/personal personal`,
 	Args: cobra.ExactArgs(2),
 	RunE: runAuto,
 }
@@ -120,7 +120,7 @@ func runAutoList(cmd *cobra.Command, args []string) error {
 
 	if len(cfg.DirectoryRules) == 0 {
 		fmt.Println("No directory rules configured yet.")
-		fmt.Println("\nAdd a rule with: gh-switch auto <directory> <profile>")
+		fmt.Println("\nAdd a rule with: gascli auto <directory> <profile>")
 		return nil
 	}
 

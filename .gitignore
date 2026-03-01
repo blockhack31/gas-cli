@@ -1,5 +1,6 @@
 # Local development files
 .DS_Store
+bin/
 *.swp
 *.bak
 scratchpad/

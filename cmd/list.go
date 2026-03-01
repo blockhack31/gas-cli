@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
-	"github.com/calghar/gh-account-switcher/internal/git"
-	"github.com/calghar/gh-account-switcher/internal/ssh"
+	"github.com/calghar/gas-cli/internal/config"
+	"github.com/calghar/gas-cli/internal/git"
+	"github.com/calghar/gas-cli/internal/ssh"
 	"github.com/spf13/cobra"
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all profiles",
-	Long:  `List all configured GitHub profiles with their details.`,
-	RunE:  runList,
+	Use:     "list",
+	Aliases: []string{"ls"},
+	Short:   "List all profiles",
+	Long:    `List all configured GitHub profiles with their details.`,
+	RunE:    runList,
 }
 
 var currentCmd = &cobra.Command{
@@ -42,7 +43,7 @@ func runList(cmd *cobra.Command, args []string) error {
 
 	if len(cfg.Profiles) == 0 {
 		fmt.Println("No profiles configured yet.")
-		fmt.Println("\nAdd a profile with: gh-switch add <name> <email>")
+		fmt.Println("\nAdd a profile with: gascli add <name> <email>")
 		return nil
 	}
 
@@ -75,6 +76,10 @@ func runList(cmd *cobra.Command, args []string) error {
 
 		if profile.GPGKey != "" {
 			fmt.Printf("    GPG key: %s\n", profile.GPGKey)
+		}
+
+		if profile.PAT != "" {
+			fmt.Printf("    PAT: configured (HTTPS)\n")
 		}
 
 		// Check SSH key status

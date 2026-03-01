@@ -16,6 +16,7 @@ type Profile struct {
 	GitName      string   `json:"git_name,omitempty"`
 	GPGKey       string   `json:"gpg_key,omitempty"`
 	SSHKeyPath   string   `json:"ssh_key_path,omitempty"`
+	PAT          string   `json:"pat,omitempty"` // GitHub Personal Access Token for HTTPS
 }
 
 // DirectoryRule represents a directory-to-profile mapping
@@ -44,7 +45,7 @@ func NewConfigManager() (*ConfigManager, error) {
 		return nil, fmt.Errorf("failed to get home directory: %w", err)
 	}
 
-	configDir := filepath.Join(homeDir, ".github-switcher")
+	configDir := filepath.Join(homeDir, ".gascli")
 	configFile := filepath.Join(configDir, "config.json")
 
 	// Create config directory if it doesn't exist

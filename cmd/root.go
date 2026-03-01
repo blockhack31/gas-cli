@@ -14,9 +14,9 @@ var (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gh-switch",
+	Use:   "gascli",
 	Short: "GitHub Account Switcher - Manage multiple Git identities",
-	Long: `gh-switch is a modern CLI tool for managing multiple GitHub accounts.
+	Long: `gascli is a modern CLI tool for managing multiple GitHub accounts.
 
 It provides automatic directory-based profile switching using Git's includeIf,
 SSH config management with IdentitiesOnly, and GPG signing support.`,

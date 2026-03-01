@@ -2,7 +2,7 @@
 
 > Modern CLI tool for managing multiple Git identities with automatic switching
 
-[![Platform Support](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](https://github.com/calghar/gh-account-switcher#-requirements) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://golang.org/)
+[![Platform Support](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)](https://github.com/calghar/gas-cli#-requirements) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?logo=go)](https://golang.org/)
 
 ## ✨ Features
 
@@ -22,77 +22,77 @@
 
 ```bash
 # macOS (Apple Silicon)
-curl -L https://github.com/calghar/gh-account-switcher/releases/latest/download/gh-switch-darwin-arm64 -o gh-switch
-chmod +x gh-switch
-sudo mv gh-switch /usr/local/bin/
+curl -L https://github.com/calghar/gas-cli/releases/latest/download/gascli-darwin-arm64 -o gascli
+chmod +x gascli
+sudo mv gascli /usr/local/bin/
 
 # macOS (Intel)
-curl -L https://github.com/calghar/gh-account-switcher/releases/latest/download/gh-switch-darwin-amd64 -o gh-switch
-chmod +x gh-switch
-sudo mv gh-switch /usr/local/bin/
+curl -L https://github.com/calghar/gas-cli/releases/latest/download/gascli-darwin-amd64 -o gascli
+chmod +x gascli
+sudo mv gascli /usr/local/bin/
 
 # Linux
-curl -L https://github.com/calghar/gh-account-switcher/releases/latest/download/gh-switch-linux-amd64 -o gh-switch
-chmod +x gh-switch
-sudo mv gh-switch /usr/local/bin/
+curl -L https://github.com/calghar/gas-cli/releases/latest/download/gascli-linux-amd64 -o gascli
+chmod +x gascli
+sudo mv gascli /usr/local/bin/
 
 # Windows (PowerShell)
-# Download from https://github.com/calghar/gh-account-switcher/releases
+# Download from https://github.com/calghar/gas-cli/releases
 ```
 
 #### Option 2: Build from Source
 
 ```bash
-git clone https://github.com/calghar/gh-account-switcher.git
-cd gh-account-switcher
+git clone https://github.com/calghar/gas-cli.git
+cd gas-cli
 make build
-make install  # Installs to ~/bin
+make install  # Installs to Go bin ($GOPATH/bin or $GOBIN)
 ```
 
 #### Option 3: Install with Go
 
 ```bash
-go install github.com/calghar/gh-account-switcher@latest
+go install github.com/calghar/gas-cli@latest
 ```
 
 ### Basic Usage
 
 ```bash
 # Add profiles
-gh-switch add work john.doe@company.com "John Doe" ABC123DEF456
-gh-switch add personal john@gmail.com "Johnny Smith"
+gascli add work john.doe@company.com "John Doe" ABC123DEF456
+gascli add personal john@gmail.com "Johnny Smith"
 
 # Setup automatic directory-based switching (recommended!)
-gh-switch auto ~/projects/work work
-gh-switch auto ~/projects/personal personal
+gascli auto ~/projects/work work
+gascli auto ~/projects/personal personal
 # Now Git automatically uses the right profile in each directory!
 
 # Or switch manually (affects global git config)
-gh-switch switch work
-gh-switch --auto-ssh switch personal  # Also adds SSH key
+gascli switch work
+gascli --auto-ssh switch personal  # Also adds SSH key
 
 # List profiles and directory rules
-gh-switch list
-gh-switch auto-list
+gascli list
+gascli auto-list
 
 # View current configuration
-gh-switch current
+gascli current
 ```
 
 ## 📋 Core Commands
 
 | Command | Description |
 |---------|-------------|
-| `gh-switch add <name> <email> [git-name] [gpg-key]` | Add a new profile |
-| `gh-switch auto <dir> <profile>` | Setup automatic switching (uses Git includeIf) |
-| `gh-switch switch <name> [email]` | Manually switch profile globally |
-| `gh-switch --auto-ssh switch <name>` | Switch and auto-add SSH key to keychain |
-| `gh-switch list` | List all profiles with details |
-| `gh-switch current` | Show current Git configuration |
-| `gh-switch auto-list` | List directory rules |
-| `gh-switch remove <name>` | Remove a profile |
-| `gh-switch export [file]` | Export profiles to JSON |
-| `gh-switch import <file>` | Import profiles from JSON |
+| `gascli add <name> <email> [git-name] [gpg-key]` | Add a new profile |
+| `gascli auto <dir> <profile>` | Setup automatic switching (uses Git includeIf) |
+| `gascli switch <name> [email]` | Manually switch profile globally |
+| `gascli --auto-ssh switch <name>` | Switch and auto-add SSH key to keychain |
+| `gascli list` | List all profiles with details |
+| `gascli current` | Show current Git configuration |
+| `gascli auto-list` | List directory rules |
+| `gascli remove <name>` | Remove a profile |
+| `gascli export [file]` | Export profiles to JSON |
+| `gascli import <file>` | Import profiles from JSON |
 
 ### 🎯 Git IncludeIf: The Better Way
 
@@ -100,11 +100,11 @@ Instead of manually switching profiles, set up automatic directory-based switchi
 
 ```bash
 # One-time setup
-gh-switch auto ~/work work-profile
-gh-switch auto ~/personal personal-profile
+gascli auto ~/work work-profile
+gascli auto ~/personal personal-profile
 
 # That's it! Git now automatically uses the right profile.
-# No need to run gh-switch switch ever again in these directories.
+# No need to run gascli switch ever again in these directories.
 ```
 
 **How it works:** Creates `.gitconfig-{profile}` files and adds `includeIf` directives to your global `.gitconfig`. Git automatically loads the correct configuration based on your repository location.
@@ -113,7 +113,7 @@ gh-switch auto ~/personal personal-profile
 
 ```bash
 # Auto SSH key management with SSH config
-$ gh-switch --auto-ssh switch work
+$ gascli --auto-ssh switch work
 Switched to profile 'work' with email 'john@company.com' and name 'John Doe'
 
 Added SSH config entry for profile 'work'
@@ -208,11 +208,11 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ### Development Setup
 
 ```bash
-git clone https://github.com/calghar/gh-account-switcher.git
-cd gh-account-switcher
+git clone https://github.com/calghar/gas-cli.git
+cd gas-cli
 make deps
 make build
-./gh-switch --help
+./gascli --help
 ```
 
 ## 📄 License
@@ -221,6 +221,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🆘 Support
 
-- **Issues**: [GitHub Issues](https://github.com/calghar/gh-account-switcher/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/calghar/gh-account-switcher/discussions)
+- **Issues**: [GitHub Issues](https://github.com/calghar/gas-cli/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/calghar/gas-cli/discussions)
 - **Documentation**: [Complete Docs](docs/)

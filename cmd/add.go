@@ -3,11 +3,13 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/calghar/gh-account-switcher/internal/config"
-	"github.com/calghar/gh-account-switcher/internal/git"
-	"github.com/calghar/gh-account-switcher/internal/ssh"
+	"github.com/calghar/gas-cli/internal/config"
+	"github.com/calghar/gas-cli/internal/git"
+	"github.com/calghar/gas-cli/internal/ssh"
 	"github.com/spf13/cobra"
 )
+
+var patFlag string
 
 var addCmd = &cobra.Command{
 	Use:   "add <name> <email> [git-name] [gpg-key]",
@@ -15,14 +17,16 @@ var addCmd = &cobra.Command{
 	Long: `Add a new GitHub profile with specified email and optional Git name and GPG key.
 
 Examples:
-  gh-switch add work john.doe@company.com "John Doe" ABC123DEF456
-  gh-switch add personal john@gmail.com "Johnny Smith"`,
+  gascli add work john.doe@company.com "John Doe" ABC123DEF456
+  gascli add personal john@gmail.com "Johnny Smith"
+  gascli add work john@company.com --pat ghp_xxxx  # With PAT for HTTPS`,
 	Args: cobra.RangeArgs(2, 4),
 	RunE: runAdd,
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
+	addCmd.Flags().StringVar(&patFlag, "pat", "", "GitHub Personal Access Token for HTTPS authentication")
 }
 
 func runAdd(cmd *cobra.Command, args []string) error {
@@ -55,13 +59,32 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("git is required but not found: %w", err)
 	}
 
-	// Create profile
+	// Create or update profile
 	profile := &config.Profile{
 		Name:         profileName,
 		Emails:       []string{email},
 		PrimaryEmail: email,
 		GitName:      gitName,
 		GPGKey:       gpgKey,
+	}
+	if patFlag != "" {
+		profile.PAT = patFlag
+	}
+
+	// Merge with existing profile if updating
+	if existing, err := cfg.GetProfile(profileName); err == nil {
+		if profile.PAT == "" && existing.PAT != "" {
+			profile.PAT = existing.PAT
+		}
+		if profile.GitName == "" && existing.GitName != "" {
+			profile.GitName = existing.GitName
+		}
+		if profile.GPGKey == "" && existing.GPGKey != "" {
+			profile.GPGKey = existing.GPGKey
+		}
+		if len(profile.Emails) == 1 && len(existing.Emails) > 1 {
+			profile.Emails = existing.Emails
+		}
 	}
 
 	// Validate and add profile
@@ -88,6 +111,14 @@ func runAdd(cmd *cobra.Command, args []string) error {
 		fmt.Printf("  Use this host in git URLs: git@%s:user/repo.git\n", hostAlias)
 	}
 
+	// Refresh git config for directory rules (e.g. to apply PAT credential setup)
+	gitMgr, err := git.NewConfigManager()
+	if err == nil {
+		if err := gitMgr.SetupAllProfiles(cfg); err != nil {
+			fmt.Printf("Warning: Failed to update git config: %v\n", err)
+		}
+	}
+
 	// Success message
 	fmt.Printf("\n✓ Profile '%s' added successfully!\n", profileName)
 	fmt.Printf("  Email: %s\n", email)
@@ -96,6 +127,9 @@ func runAdd(cmd *cobra.Command, args []string) error {
 	}
 	if gpgKey != "" {
 		fmt.Printf("  GPG key: %s\n", gpgKey)
+	}
+	if profile.PAT != "" {
+		fmt.Printf("  PAT: configured (HTTPS auth)\n")
 	}
 
 	// Check if SSH key exists
@@ -107,8 +141,8 @@ func runAdd(cmd *cobra.Command, args []string) error {
 
 	// Suggest next steps
 	fmt.Println("\nNext steps:")
-	fmt.Printf("  1. Set up a directory rule: gh-switch auto ~/projects/work %s\n", profileName)
-	fmt.Printf("  2. Or switch manually: gh-switch switch %s\n", profileName)
+	fmt.Printf("  1. Set up a directory rule: gascli auto ~/projects/work %s\n", profileName)
+	fmt.Printf("  2. Or switch manually: gascli switch %s\n", profileName)
 
 	return nil
 }
