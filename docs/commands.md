@@ -3,11 +3,13 @@
 ## Profile Management
 
 ```bash
-gascli add <name> <email> [git-name] [gpg-key] [--pat TOKEN]
+gascli add <name> [git-name] [email|pat] [gpg-key] [--pat TOKEN]
 gascli list | gascli ls
 gascli current
 gascli remove <name>
 ```
+
+Name is required; git-name, email, and gpg-key are optional. `gascli add work "John Doe" ghp_xxx` adds name + git-name + PAT. Add email later with `add-email`.
 
 ## PAT (Personal Access Token)
 

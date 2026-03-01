@@ -48,7 +48,9 @@ func runRemove(cmd *cobra.Command, args []string) error {
 	// Confirm removal if not skipping prompts
 	if !skipPrompts {
 		fmt.Printf("Are you sure you want to remove profile '%s'?\n", profileName)
-		fmt.Printf("  Email: %s\n", profile.PrimaryEmail)
+		if profile.PrimaryEmail != "" {
+			fmt.Printf("  Email: %s\n", profile.PrimaryEmail)
+		}
 
 		// Count associated directory rules
 		ruleCount := 0

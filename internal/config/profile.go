@@ -107,11 +107,7 @@ func (p *Profile) Validate() error {
 		return fmt.Errorf("profile name cannot be empty")
 	}
 
-	if p.PrimaryEmail == "" {
-		return fmt.Errorf("primary email cannot be empty")
-	}
-
-	if !isValidEmail(p.PrimaryEmail) {
+	if p.PrimaryEmail != "" && !isValidEmail(p.PrimaryEmail) {
 		return fmt.Errorf("invalid email format: %s", p.PrimaryEmail)
 	}
 
@@ -148,16 +144,18 @@ func (c *Config) AddProfile(profile *Profile) error {
 		return err
 	}
 
-	// Ensure emails list contains primary email
-	found := false
-	for _, email := range profile.Emails {
-		if email == profile.PrimaryEmail {
-			found = true
-			break
+	// Ensure emails list contains primary email when set
+	if profile.PrimaryEmail != "" {
+		found := false
+		for _, email := range profile.Emails {
+			if email == profile.PrimaryEmail {
+				found = true
+				break
+			}
 		}
-	}
-	if !found {
-		profile.Emails = append([]string{profile.PrimaryEmail}, profile.Emails...)
+		if !found {
+			profile.Emails = append([]string{profile.PrimaryEmail}, profile.Emails...)
+		}
 	}
 
 	c.Profiles[profile.Name] = profile
@@ -217,6 +215,10 @@ func (c *Config) AddEmail(profileName, email string) error {
 	}
 
 	profile.Emails = append(profile.Emails, email)
+	// Set as primary when adding first email
+	if profile.PrimaryEmail == "" {
+		profile.PrimaryEmail = email
+	}
 	return nil
 }
 

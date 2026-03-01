@@ -35,8 +35,9 @@ internal/
 ## Command Reference
 
 ```bash
-# Profiles
-gascli add <name> <email> [git-name] [gpg-key] [--pat TOKEN]
+# Profiles (name required; git-name, email|pat optional)
+gascli add <name> [git-name] [email|pat] [gpg-key] [--pat TOKEN]
+# name + git-name + PAT: gascli add work "John Doe" ghp_xxx
 gascli list | gascli ls
 gascli remove <name>
 

@@ -55,6 +55,11 @@ func runSwitch(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("profile not found: %w", err)
 	}
 
+	// Profile needs email for Git commits
+	if profile.PrimaryEmail == "" {
+		return fmt.Errorf("profile '%s' has no email; add one with: gascli add-email %s <email>", profileName, profileName)
+	}
+
 	// If specific email is provided, verify it exists in profile
 	emailToUse := profile.PrimaryEmail
 	if specificEmail != "" {

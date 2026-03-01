@@ -56,7 +56,11 @@ func runList(cmd *cobra.Command, args []string) error {
 		}
 
 		fmt.Printf("%s%s\n", marker, name)
-		fmt.Printf("    Primary email: %s\n", profile.PrimaryEmail)
+		if profile.PrimaryEmail != "" {
+			fmt.Printf("    Primary email: %s\n", profile.PrimaryEmail)
+		} else {
+			fmt.Printf("    Primary email: (not set)\n")
+		}
 
 		if len(profile.Emails) > 1 {
 			otherEmails := []string{}

@@ -35,11 +35,14 @@ func (gm *ConfigManager) SetupProfile(profile *config.Profile, directoryPath str
 
 	var configContent strings.Builder
 	configContent.WriteString(fmt.Sprintf("# Git configuration for profile: %s\n", profile.Name))
-	configContent.WriteString(fmt.Sprintf("[user]\n"))
-	configContent.WriteString(fmt.Sprintf("\temail = %s\n", profile.PrimaryEmail))
 
-	if profile.GitName != "" {
-		configContent.WriteString(fmt.Sprintf("\tname = %s\n", profile.GitName))
+	// User section only when email is set (required for commits)
+	if profile.PrimaryEmail != "" {
+		configContent.WriteString(fmt.Sprintf("[user]\n"))
+		configContent.WriteString(fmt.Sprintf("\temail = %s\n", profile.PrimaryEmail))
+		if profile.GitName != "" {
+			configContent.WriteString(fmt.Sprintf("\tname = %s\n", profile.GitName))
+		}
 	}
 
 	// GPG signing configuration
