@@ -61,7 +61,7 @@ func UserFacingError(err error) (title, message string) {
 	switch {
 	case errors.Is(err, git.ErrNotGitRepository), errors.Is(err, git.ErrGitConfigMissing):
 		return "Not a GitHub repository",
-			".git/config was not found.\n\nRun gascli from inside a cloned GitHub repository, or cd to a directory that contains .git/config."
+			"No .git directory found in the current path.\n\nCd into a cloned GitHub repository root (where .git exists), then press r to apply your profile and PAT."
 	case errors.Is(err, git.ErrOriginMissing):
 		return "Not a GitHub repository",
 			"No origin remote found in .git/config.\n\nAdd a GitHub remote first:\n  git remote add origin https://github.com/owner/repo.git"
