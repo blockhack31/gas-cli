@@ -8,7 +8,9 @@ import (
 	"strings"
 
 	"github.com/calghar/gas-cli/internal/config"
+	"github.com/calghar/gas-cli/internal/ghsetup"
 	"github.com/calghar/gas-cli/internal/git"
+	"github.com/calghar/gas-cli/internal/profile"
 	"github.com/spf13/cobra"
 )
 
@@ -33,19 +35,18 @@ func init() {
 }
 
 func runGh(cmd *cobra.Command, args []string) error {
-	// Get remote URL and repo info from .git/config
-	repoInfo, err := git.GetRemoteOriginURL()
+	repoInfo, err := git.GetGitHubRepoInfo()
 	if err != nil {
-		return err
+		_, msg := ghsetup.UserFacingError(err)
+		return fmt.Errorf("%s", msg)
 	}
 
-	// Parse GitHub username from URL
 	ghUsername, err := git.ParseGitHubUsername(repoInfo.URL)
 	if err != nil {
-		return err
+		_, msg := ghsetup.UserFacingError(err)
+		return fmt.Errorf("%s", msg)
 	}
 
-	// Load config
 	configMgr, err := config.NewConfigManager()
 	if err != nil {
 		return fmt.Errorf("failed to initialize config manager: %w", err)
@@ -55,74 +56,25 @@ func runGh(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to load configuration: %w", err)
 	}
 
-	// Find matching profile
-	var profileName string
-	var profile *config.Profile
-
-	// 1. Check default/current profile first
-	if cfg.CurrentProfile != "" {
-		p, err := cfg.GetProfile(cfg.CurrentProfile)
-		if err == nil && p.GitName == ghUsername {
-			profileName = cfg.CurrentProfile
-			profile = p
-		}
-	}
-
-	// 2. If no match, find by git-name or profile name
-	if profile == nil {
-		name, p := cfg.GetProfileByGitNameOrName(ghUsername)
-		if p != nil {
-			profileName = name
-			profile = p
-		}
-	}
-
-	// 3. If no match (owner/org from URL doesn't match any profile git-name), list and ask
-	if profile == nil {
-		profileName, profile = promptSelectProfile(cfg, ghUsername)
-		if profile == nil {
+	profileName, prof := ghsetup.FindProfile(cfg, ghUsername)
+	if prof == nil {
+		profileName, prof = promptSelectProfile(cfg, ghUsername)
+		if prof == nil {
 			return fmt.Errorf("no profile selected")
 		}
 	}
 
-	// Profile must have PAT
-	if profile.PAT == "" {
-		return fmt.Errorf("profile '%s' has no PAT; set with: gascli pat set %s <token>", profileName, profileName)
+	result, err := ghsetup.ConfigureRepoWithProfile(cfg, profileName)
+	if err != nil {
+		return err
 	}
 
-	// Profile must have email for commits
-	email := profile.PrimaryEmail
-	if email == "" {
-		return fmt.Errorf("profile '%s' has no email; add with: gascli add-email %s <email>", profileName, profileName)
-	}
-
-	// Use profile's GitName for user.name (GitHub username for commits); fallback to profile name or URL owner
-	userName := profile.GitName
-	if userName == "" {
-		userName = profileName
-	}
-	if userName == "" {
-		userName = ghUsername
-	}
-
-	// Run git commands from repo root
-	remoteURL := fmt.Sprintf("https://%s:%s@github.com/%s/%s.git", ghUsername, profile.PAT, ghUsername, repoInfo.RepoName)
-
-	if err := runGitConfig(repoInfo.RootDir, "user.name", userName); err != nil {
-		return fmt.Errorf("failed to set user.name: %w", err)
-	}
-	if err := runGitConfig(repoInfo.RootDir, "user.email", email); err != nil {
-		return fmt.Errorf("failed to set user.email: %w", err)
-	}
-	if err := runGitRemoteSetURL(repoInfo.RootDir, "origin", remoteURL); err != nil {
-		return fmt.Errorf("failed to set remote URL: %w", err)
+	if err := profile.Save(configMgr, cfg); err != nil {
+		return fmt.Errorf("failed to save configuration: %w", err)
 	}
 
 	fmt.Println("Verifying remote access...")
-	if err := runGitLsRemote(repoInfo.RootDir); err != nil {
-		return fmt.Errorf("verification failed: %w\nIf the selected profile cannot access this repo, try a different profile.", err)
-	}
-	runGitRemoteV(repoInfo.RootDir)
+	runGitRemoteV(result.RepoRoot)
 	fmt.Println("Git remote URL has been updated and verified successfully!")
 	return nil
 }
@@ -159,33 +111,6 @@ func promptSelectProfile(cfg *config.Config, ghUsername string) (string, *config
 	profileName := names[idx-1]
 	profile, _ := cfg.GetProfile(profileName)
 	return profileName, profile
-}
-
-func runGitConfig(dir, key, value string) error {
-	c := exec.Command("git", "config", key, value)
-	c.Dir = dir
-	if out, err := c.CombinedOutput(); err != nil {
-		return fmt.Errorf("%w\n%s", err, string(out))
-	}
-	return nil
-}
-
-func runGitRemoteSetURL(dir, remote, url string) error {
-	c := exec.Command("git", "remote", "set-url", remote, url)
-	c.Dir = dir
-	if out, err := c.CombinedOutput(); err != nil {
-		return fmt.Errorf("%w\n%s", err, string(out))
-	}
-	return nil
-}
-
-func runGitLsRemote(dir string) error {
-	c := exec.Command("git", "ls-remote", "origin")
-	c.Dir = dir
-	if out, err := c.CombinedOutput(); err != nil {
-		return fmt.Errorf("%w\n%s", err, string(out))
-	}
-	return nil
 }
 
 func runGitRemoteV(dir string) {

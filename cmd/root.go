@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/calghar/gas-cli/internal/tui"
 	"github.com/spf13/cobra"
 )
 
@@ -18,9 +19,12 @@ var rootCmd = &cobra.Command{
 	Short: "GitHub Account Switcher - Manage multiple Git identities",
 	Long: `gascli is a modern CLI tool for managing multiple GitHub accounts.
 
-It provides automatic directory-based profile switching using Git's includeIf,
-SSH config management with IdentitiesOnly, and GPG signing support.`,
+Running gascli with no subcommand opens the interactive identity manager.
+Subcommands are available for scripting and automation.`,
 	Version: version,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return tui.Run()
+	},
 }
 
 func Execute() {

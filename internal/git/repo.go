@@ -2,11 +2,23 @@ package git
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+)
+
+var (
+	// ErrNotGitRepository is returned when .git/config cannot be found.
+	ErrNotGitRepository = errors.New("not a git repository")
+	// ErrGitConfigMissing is returned when .git/config does not exist.
+	ErrGitConfigMissing = errors.New(".git/config not found")
+	// ErrOriginMissing is returned when origin is not configured in .git/config.
+	ErrOriginMissing = errors.New("origin remote not found in .git/config")
+	// ErrNotGitHubRepo is returned when the origin URL is not a GitHub repository.
+	ErrNotGitHubRepo = errors.New("not a GitHub repository")
 )
 
 // RepoInfo holds parsed repo information.
@@ -38,15 +50,32 @@ func GetRemoteOriginURL() (*RepoInfo, error) {
 		}
 		parent := filepath.Dir(dir)
 		if parent == dir {
-			return nil, fmt.Errorf("not a git repository (or any of the parent directories)")
+			return nil, fmt.Errorf("%w: .git/config not found in current directory or parents", ErrNotGitRepository)
 		}
 		dir = parent
 	}
 }
 
+// GetGitHubRepoInfo reads .git/config and ensures origin points to a GitHub repository.
+func GetGitHubRepoInfo() (*RepoInfo, error) {
+	info, err := GetRemoteOriginURL()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := ParseGitHubUsername(info.URL); err != nil {
+		return nil, fmt.Errorf("%w: origin points to %s", ErrNotGitHubRepo, info.URL)
+	}
+
+	return info, nil
+}
+
 func readRemoteOriginURL(configPath string) (string, error) {
 	f, err := os.Open(configPath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("%w: %s", ErrGitConfigMissing, configPath)
+		}
 		return "", fmt.Errorf("failed to open git config: %w", err)
 	}
 	defer f.Close()
@@ -68,7 +97,7 @@ func readRemoteOriginURL(configPath string) (string, error) {
 			}
 		}
 	}
-	return "", fmt.Errorf("remote origin URL not found in .git/config")
+	return "", fmt.Errorf("%w: no [remote \"origin\"] url in .git/config", ErrOriginMissing)
 }
 
 // ParseGitHubUsername extracts the GitHub username (owner) from a repo URL.
@@ -84,5 +113,5 @@ func ParseGitHubUsername(repoURL string) (string, error) {
 	if len(httpsMatch) >= 2 {
 		return httpsMatch[1], nil
 	}
-	return "", fmt.Errorf("could not parse GitHub username from URL: %s", repoURL)
+	return "", fmt.Errorf("%w: could not parse GitHub owner from URL: %s", ErrNotGitHubRepo, repoURL)
 }
